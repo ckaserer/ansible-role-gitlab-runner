@@ -37,11 +37,6 @@
   when: 
     - not gitlab_runner_binary.stat.exists
     - current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
-
-- name: Remove gitlab-runner from tmp directory
-  file:
-    path: /tmp/gitlab-runner
-    state: absent
     
 - name: Add the user 'gitlab-runner' with a bash shell
   user:
