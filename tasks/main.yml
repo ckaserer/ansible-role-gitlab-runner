@@ -37,6 +37,7 @@
     remote_src: yes
   when:
     - not gitlab_runner_binary.stat.exists
+    - not current_gitlab_runner_binary.stat.exists
     - current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
 
 - name: Add the user 'gitlab-runner' with a bash shell
