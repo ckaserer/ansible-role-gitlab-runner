@@ -2,5 +2,14 @@
   - name: Verify
     hosts: all
     become: true
-    tasks: []
+    tasks:
+      - name: Populate service facts
+        service_facts:
+
+      - name: Check gitlab-runner service
+        assert:
+          that:
+            - ansible_facts.services['gitlab-runner.service'].state == "running"
+            - ansible_facts.services['gitlab-runner.service'].status == "enabled"
+
 ...
