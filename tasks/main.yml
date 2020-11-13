@@ -12,7 +12,7 @@
     get_checksum: yes
   register: current_gitlab_runner_binary
 
-- name: Download latest gitlab-runner
+- name: "Download latest gitlab-runner for {{ architecture }}"
   get_url:
     url: "https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-{{ architecture }}"
     dest: /tmp/gitlab-runner
