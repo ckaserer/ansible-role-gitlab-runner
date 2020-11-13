@@ -47,7 +47,7 @@
     groups: "{{ gitlab_runner_groups }}"
     append: yes
 
-# required for shell executor
+# required for shell executor on systems with .bash_logout
 # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/26605#note_403531095
 - name: Remove .bash_logout from gitlab-runner user
   file:
