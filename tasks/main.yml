@@ -16,13 +16,13 @@
     mode: '0777'
 
 - name: Add the user 'gitlab-runner' with a bash shell
-    user:
-      name: gitlab-runner
-      create_home: true
-      comment: GitLab Runner
-      shell: /bin/bash
-      groups: "{{ gitlab_runner_groups }}"
-      append: yes
+  user:
+    name: gitlab-runner
+    create_home: true
+    comment: GitLab Runner
+    shell: /bin/bash
+    groups: "{{ gitlab_runner_groups }}"
+    append: yes
 
 - name: Install gitlab-runner
   command: gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
