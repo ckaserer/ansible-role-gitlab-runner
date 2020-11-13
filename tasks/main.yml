@@ -5,16 +5,44 @@
     path:  /usr/local/bin/gitlab-runner
   register: gitlab_runner_binary
 
-- name: Stop gitlab-runner
-  command: gitlab-runner stop
-  when: gitlab_runner_binary.stat.exists
-
-- name: Download gitlab-runner
+- name: Download latest gitlab-runner
   get_url:
     url: "https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-{{ architecture }}"
-    dest: /usr/local/bin/gitlab-runner
+    dest: /tmp/gitlab-runner
     mode: '0777'
 
+- name: Get checksum for latest git-labrunner
+  stat:
+    path: /tmp/gitlab-runner
+    get_checksum: yes
+  register: latest_gitlab_runner_binary
+
+- name: Get checksum for current git-labrunner
+  stat:
+    path: /usr/local/bin/gitlab-runner
+    get_checksum: yes
+  register: current_gitlab_runner_binary
+
+- name: Stop gitlab-runner
+  command: gitlab-runner stop
+  when: 
+    - gitlab_runner_binary.stat.exists
+    - current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
+
+- name: Copy gitlab-runner binary to /usr/local/bin
+  copy:
+    src: /tmp/gitlab-runner
+    dest: /usr/local/bin/gitlab-runner
+    remote_src: yes
+  when: 
+    - not gitlab_runner_binary.stat.exists
+    - current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
+
+- name: Remove gitlab-runner from tmp directory
+  file:
+    path: /tmp/gitlab-runner
+    state: absent
+    
 - name: Add the user 'gitlab-runner' with a bash shell
   user:
     name: gitlab-runner
@@ -35,5 +63,8 @@
     
 - name: Start gitlab-runner
   command: gitlab-runner start
+  when: 
+    - not gitlab_runner_binary.stat.exists
+    - current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
   
 ...
