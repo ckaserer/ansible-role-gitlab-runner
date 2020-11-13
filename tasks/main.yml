@@ -1,6 +1,12 @@
 ---
 
-- name: Get checksum for current git-labrunner
+- name: Populate service facts
+  service_facts:
+
+# Check if gitlab-runner binary exists
+# If it doesn't exist copy the latest downloaded gitlab-runner to /usr/local/bin
+# If it exists get its checksum to compare if the installed version is outdated
+- name: Get checksum for current gitlab-runner
   stat:
     path:  /usr/local/bin/gitlab-runner
     get_checksum: yes
@@ -12,18 +18,27 @@
     dest: /tmp/gitlab-runner
     mode: '0777'
 
-- name: Get checksum for latest git-labrunner
+- name: Get checksum for latest gitlab-runner
   stat:
     path: /tmp/gitlab-runner
     get_checksum: yes
   register: latest_gitlab_runner_binary
 
+# Stop gitlab-runner if
+#   /usr/local/bin/gitlab-runner exists and
+#   the checksums don't match 
+# to avoid unnecessary service downtime
 - name: Stop gitlab-runner
-  command: gitlab-runner stop
+  service:
+    name: gitlab-runner
+    state: stopped
   when:
     - current_gitlab_runner_binary.stat.exists
     - current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
 
+# Copy gitlab-runner if
+#   gitlab-runner has not been installed yet or
+#   a newer version of gitlab-runner has been downloaded 
 - name: Copy gitlab-runner binary to /usr/local/bin
   copy:
     src: /tmp/gitlab-runner
@@ -46,7 +61,8 @@
     groups: "{{ gitlab_runner_groups }}"
     append: yes
 
-# required for shell executor on systems with .bash_logout
+# required for shell executor on systems with .bash_logout otherwise this results in following error
+# ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information
 # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/26605#note_403531095
 - name: Remove .bash_logout from gitlab-runner user
   file:
@@ -56,22 +72,16 @@
   become: true
   become_user: gitlab-runner
 
+# install gitlab-runner when gitlab-runner.service could not be found
 - name: Install gitlab-runner
   command: gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
-  register: gitlab_runner_install
-  failed_when:
-    - gitlab_runner_install.rc != 0
-    - "'FATAL: Failed to install gitlab-runner: Init already exists: /etc/systemd/system/gitlab-runner.service' not in gitlab_runner_install.stderr"
-  changed_when:
-    - gitlab_runner_install.rc == 0
+  when:
+    - ansible_facts.services['gitlab-runner.service'] is not defined
 
 - name: Start gitlab-runner
-  command: gitlab-runner start
-  when:
-    - not current_gitlab_runner_binary.stat.exists or
-      (
-        (current_gitlab_runner_binary.stat.exists) and
-        (current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum)
-      )
+  service:
+    name: gitlab-runner
+    state: started
+    enabled: true
 
 ...
