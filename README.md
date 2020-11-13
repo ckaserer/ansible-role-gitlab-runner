@@ -5,5 +5,6 @@
 # ckaserer.gitlab_runner
 
 Manual steps:
+
 * run gitlab-runner register
 * install, enable and start docker if needed
