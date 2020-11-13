@@ -1,6 +1,6 @@
 ---
 stages:
-  - init
+  - prepare
   - test
 
 variables:
