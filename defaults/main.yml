@@ -1,4 +1,4 @@
 ---
 architecture: "arm64"
-gitlab_runner_groups: "wheel"
+gitlab_runner_groups: ""
 ...

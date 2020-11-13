@@ -28,6 +28,6 @@
   command: gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
 
 - name: Start gitlab-runner
-  command: gitlab-runner Start
+  command: gitlab-runner start
   
 ...
