@@ -26,6 +26,9 @@
 
 - name: Install gitlab-runner
   command: gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+  register: gitlab_runner_install
+  failed_when:
+    - "'FATAL: Failed to install gitlab-runner: Init already exists: /etc/systemd/system/gitlab-runner.service' not in gitlab_runner_install.stderr" and gitlab_runner_install.rc != 0
 
 - name: Start gitlab-runner
   command: gitlab-runner start
