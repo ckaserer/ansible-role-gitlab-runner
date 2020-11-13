@@ -54,7 +54,7 @@
   file:
     path: ~/.bash_logout
     mode: "0000"
-    state: abesent
+    state: absent
   become: true
   become_user: gitlab-runner
 
