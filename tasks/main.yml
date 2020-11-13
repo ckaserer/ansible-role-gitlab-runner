@@ -1,9 +1,10 @@
 ---
 
-- name: Check for gitlab-runner binary
+- name: Get checksum for current git-labrunner
   stat:
     path:  /usr/local/bin/gitlab-runner
-  register: gitlab_runner_binary
+    get_checksum: yes
+  register: current_gitlab_runner_binary
 
 - name: Download latest gitlab-runner
   get_url:
@@ -17,16 +18,10 @@
     get_checksum: yes
   register: latest_gitlab_runner_binary
 
-- name: Get checksum for current git-labrunner
-  stat:
-    path: /usr/local/bin/gitlab-runner
-    get_checksum: yes
-  register: current_gitlab_runner_binary
-
 - name: Stop gitlab-runner
   command: gitlab-runner stop
   when:
-    - gitlab_runner_binary.stat.exists
+    - current_gitlab_runner_binary.stat.exists
     - current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
 
 - name: Copy gitlab-runner binary to /usr/local/bin
@@ -36,10 +31,11 @@
     mode: "0777"
     remote_src: yes
   when:
-    - not gitlab_runner_binary.stat.exists
-    - not current_gitlab_runner_binary.stat.exists
-    - current_gitlab_runner_binary.stat.checksum is defined and
-      current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
+    - not current_gitlab_runner_binary.stat.exists or
+      (
+        (current_gitlab_runner_binary.stat.exists) and
+        (current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum)
+      )
 
 - name: Add the user 'gitlab-runner' with a bash shell
   user:
@@ -67,12 +63,15 @@
     - gitlab_runner_install.rc != 0
     - "'FATAL: Failed to install gitlab-runner: Init already exists: /etc/systemd/system/gitlab-runner.service' not in gitlab_runner_install.stderr"
   changed_when:
-    - "'FATAL: Failed to install gitlab-runner: Init already exists: /etc/systemd/system/gitlab-runner.service' not in gitlab_runner_install.stderr"
+    - gitlab_runner_install.rc == 0
 
 - name: Start gitlab-runner
   command: gitlab-runner start
   when:
-    - not gitlab_runner_binary.stat.exists
-    - current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum
+    - not current_gitlab_runner_binary.stat.exists or
+      (
+        (current_gitlab_runner_binary.stat.exists) and
+        (current_gitlab_runner_binary.stat.checksum != latest_gitlab_runner_binary.stat.checksum)
+      )
 
 ...
