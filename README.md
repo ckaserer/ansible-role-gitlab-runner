@@ -3,3 +3,7 @@
 ![Maintenance](https://img.shields.io/maintenance/yes/2021?style=flat-square)
 
 # ckaserer.gitlab_runner
+
+Manual steps:
+* run gitlab-runner register
+* install, enable and start docker if needed

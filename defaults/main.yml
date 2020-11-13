@@ -1,4 +1,4 @@
 ---
-architecture: "arm64"
+architecture: "amd64"
 gitlab_runner_groups: ""
 ...
