@@ -3,9 +3,9 @@ os: linux
 dist: xenial
 language: python
 python:
-  - '3.6'
+- '3.6'
 services:
-  - docker
+- docker
 notifications:
   email:
     on_success: never
@@ -15,17 +15,23 @@ notifications:
     rooms:
       secure: jUa3+cLKNqclhohsqfdbq+8LXLxvKSsxkgXN+ORMokNlgwH44GSlNmd2m9JL0YoD2ro6U/9nM/qfgD8skEX/xtNthfpR+0mq5fSojR9F5apJaqlfBD1mk28A21X3YHLQR4Cyy0bRO1vB7o3WJFpy7bRc7C9yBL05gkT+gyU9iHUzp575GR4rR7Y82vHKPEn1HmFsdND5DAX1JWNLZW5ppzGZREmbICJJGfesDPCjZbblxnhXKKaY0dJEQyhwx5ECLamxfubxrZJ8dRzAKFmZN3MActO+PXS5TXQWO37UjEhVp9m8tpzsTqFOULz+himfCXWxLr9hC/ZuOLZQuQ7e3892ya9eoU3y3bZ84OWHzC/etQtioW5C27PmsvZkVTen59VGmCx+DBvMGoFJX55F0YfSjJNSI4S0Ujf1bfMXyoDM9k9uwf5m9vMqHI+uBL09Z1s5hrUmgmWoWaxrd7qCXGlq3lWez/bPzCDv0bzjc9qouv/oONUFu1gmsdq/dVlM7ujBXQbpC0WN+3Lbj99SfXNAFWx3e7iCKIrkHbBVgCnpn1l3fiJ7YcTjc7YMikSDcpQgX6QHrpQHFgd7Vot7yQXwSJYrgzsgY0E/nqTx+xpN1Scy4yjvBpMrJl1r5F3NZZKUF2bwMT951yefBTAm+7CA7dIlvq4cpmjjE/b1mPo=
     template:
-      - "%{commit_subject}"
-      - build <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) @%{branch}
-      - by %{author} %{result} in %{duration}
+    - "%{commit_subject}"
+    - build <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) @%{branch}
+    - by %{author} %{result} in %{duration}
     on_success: change
     on_failure: always
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
-
 install:
-  - pip install -r requirements.txt
+- pip install -r requirements.txt
 env:
   jobs:
-    - SCENARIO=default
+  - SCENARIO=default
+  global:
+    secure: jmca6Bz6Ug20yldPHs6H7L9IKt1uHnK5mJnhwhTN3n1WIexb9f9lOmWTMN5OjyffdHUcNq4Oozq+LTXj4KV6nHCfyH19zfMZDFbw4L6Wx0BaR4DFuu8SnAyhSIPBbKi09nPCmB9gPWyOzr8bCx8oWDO7Kv+99On7manOqDMbnSBa7LL7/lB638ZqaS/6BsSLlRkKAW4Sg8JmreH/PC3d97RramBAdnf4TCnfs1LGrJ+Ez92zFHOMlTWe4AIObMo+JcFT0LhdFIuCgFcrbDgaIWH6O4Cu8ddy2QHI6RYZSdgY5mlKpsYKXjomphtaGRzeYgCkAZnCnlrajDJPREuoXk1BgboQK7/LexLlubfnDOTmO6EN7qNA2iTEQn9r336zNAGhG0iYnnkje/w9pVtvhStBZQ/7mrpP7J40rfgNcvl2Z6PbMqstGH6Jc3DbBJGwqyMLUEXXWpgN18XrKj6Dymgi4CSRmMTShGMfOyc19C+HmvyTQm+rP8/sokr9EA/IIlU/Z3gaGwpGIvvamP8yK1+4QcoUXpheh+Q61zsszgI77XczpDSbVDdQ6dF2/8Nqi3H5l9JrFj02Y7O42+OBdfYiEEiMrYclLl7JGhUgqpladvMtXorWL9jdKTibphYZZ61N/sNbc0z5sJWD01YXc/2YcS+D2t1eAdeTWQS7aoM=
 script:
-  - molecule test --scenario-name ${SCENARIO}
+- molecule test --scenario-name ${SCENARIO}
+
+after_success:
+  - "curl -o /tmp/merge.sh https://raw.githubusercontent.com/ckaserer/travis-merge-script/master/merge.sh"
+  - "chmod a+x /tmp/merge.sh"
+  - "BRANCHES_TO_MERGE_REGEX='^develop' BRANCH_TO_MERGE_INTO=master GIT_REPO=${TRAVIS_REPO_SLUG} GIT_SERVER=github.com /tmp/merge.sh"
