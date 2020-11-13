@@ -27,5 +27,6 @@ install:
 # env:
 #   jobs:
 #     - SCENARIO=default
-# script:
+script:
+  - echo "test"
 #   - molecule test --scenario-name ${SCENARIO}
