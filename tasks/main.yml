@@ -47,6 +47,15 @@
     groups: "{{ gitlab_runner_groups }}"
     append: yes
 
+# required for shell executor
+# https://gitlab.com/gitlab-org/gitlab-runner/-/issues/26605#note_403531095
+- name: Remove .bash_logout from gitlab-runner user
+  file:
+    path: ~/.bash_logout
+    state: abesent
+  become: true
+  become_user: gitlab-runner
+
 - name: Install gitlab-runner
   command: gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
   register: gitlab_runner_install
