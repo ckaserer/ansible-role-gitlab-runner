@@ -23,8 +23,8 @@ notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
 install:
 - pip install -r requirements.txt
-- curl -Lo /tmp/merge.sh https://raw.githubusercontent.com/ckaserer/git-merge-script/master/merge.sh
-- chmod a+x /tmp/merge.sh
+- curl -sSLo merge.sh https://raw.githubusercontent.com/ckaserer/git-merge-script/master/merge.sh
+- chmod a+x merge.sh
 env:
   jobs:
   - SCENARIO=default
@@ -33,5 +33,4 @@ env:
 script:
 - molecule test --scenario-name ${SCENARIO}
 after_success:
-- BRANCHES_TO_MERGE_REGEX='^develop' BRANCH_TO_MERGE_INTO=master GIT_REPO=${TRAVIS_REPO_SLUG}
-  GIT_SERVER=github.com /tmp/merge.sh
+- BRANCHES_TO_MERGE_REGEX='^develop' BRANCH_TO_MERGE_INTO=master merge.sh
