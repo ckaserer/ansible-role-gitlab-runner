@@ -1,4 +1,6 @@
 ---
 architecture: "amd64"
+gitlab_runner_url: "https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-{{ architecture }}"
+
 gitlab_runner_groups: ""
 ...
