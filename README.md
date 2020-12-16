@@ -4,6 +4,12 @@
 
 # ckaserer.gitlab_runner
 
+:warning: This role needs to be run as root.
+
+This is due to the fact, that we will use become_user in the role to switch to a newly created user "gitlab-runner" and only root can switch to a new user by default.
+
+----
+
 Manual steps:
 
 * run gitlab-runner register
